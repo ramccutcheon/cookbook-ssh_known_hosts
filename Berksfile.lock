@@ -1,0 +1,10 @@
+{
+  "sources": {
+    "ssh_known_hosts": {
+      "path": "."
+    },
+    "partial_search": {
+      "locked_version": "1.0.0"
+    }
+  }
+}
