@@ -1,3 +1,4 @@
+# encoding: UTF-8
 #
 # Author:: Seth Vargo (<sethvargo@gmail.com>)
 # Provider:: entry
@@ -19,19 +20,21 @@
 
 action :create do
   ssh_host, ssh_port = new_resource.host.split(':')
-  key = (new_resource.key || `ssh-keyscan -p #{ssh_port || '22'} -H #{ssh_host} 2>&1`)
-  Chef::Application.fatal! "Could not connect #{new_resource.host}" if key.nil? or key.empty?
+  cmd = Mixlib::ShellOut.new("ssh-keyscan -p #{ssh_port || '22'} -H #{ssh_host} 2>&1")
+  cmd.run_command
+  key = (new_resource.key || cmd.stdout)
+  Chef::Application.fatal! "Could not connect #{new_resource.host}" if key.nil? || key.empty?
   comment = key.split("\n").first
 
   Chef::Application.fatal! "Could not resolve #{new_resource.host}" if key =~ /getaddrinfo/
 
   # Ensure that the file exists and has minimal content (required by Chef::Util::FileEdit)
   file node['ssh_known_hosts']['file'] do
-    action        :create
-    backup        false
-    content       '# This file must contain at least one line. This is that line.'
+    action :create
+    backup false
+    content '# This file must contain at least one line. This is that line.'
     only_if do
-      !::File.exists?(node['ssh_known_hosts']['file']) || ::File.new(node['ssh_known_hosts']['file']).readlines.length == 0
+      !::File.exist?(node['ssh_known_hosts']['file']) || ::File.new(node['ssh_known_hosts']['file']).readlines.length == 0
     end
   end
 

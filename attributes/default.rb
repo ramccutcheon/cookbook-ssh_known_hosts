@@ -1,3 +1,4 @@
+# encoding: UTF-8
 #
 # Author:: Seth Vargo (<sethvargo@gmail.com>)
 # Attributes:: default
